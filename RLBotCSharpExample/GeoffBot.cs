@@ -1,9 +1,8 @@
-﻿using System;
+﻿using rlbot.flat;
 using RLBotDotNet;
-using rlbot.flat;
+using System;
 
-namespace Geoff
-{
+namespace Geoff {
     // We want to our bot to derive from Bot, and then implement its abstract methods.
     class GeoffBot : Bot
     {
@@ -27,10 +26,10 @@ namespace Geoff
                 Rotator carRotation = gameTickPacket.Players(this.index).Value.Physics.Value.Rotation.Value;
 
                 // Calculate to get the angle from the front of the bot's car to the ball.
-                double botToTargetAngle = Math.Atan2(ballLocation.Y - carLocation.Y, ballLocation.X - carLocation.X);
+                double botToTargetAngle = GetHorizontalAngle(carLocation, ballLocation);
                 double botFrontToTargetAngle = botToTargetAngle - carRotation.Yaw;
                 // Correct the angle
-                botFrontToTargetAngle = correctAngle(botFrontToTargetAngle);
+                botFrontToTargetAngle = CorrectAngle(botFrontToTargetAngle);
 
                 // Decide which way to steer in order to get to the ball.
                 controller.Steer = (float) (botFrontToTargetAngle / Math.PI);
@@ -51,7 +50,7 @@ namespace Geoff
             return controller;
         }
 
-        private double correctAngle(double angle) {
+        private double CorrectAngle(double angle) {
             if (angle < -Math.PI) {
                 angle += 2 * Math.PI;
             } else if (angle > Math.PI) {
@@ -61,5 +60,12 @@ namespace Geoff
             return angle;
         }
         
+        private double GetHorizontalAngle(Vector3 from, Vector3 to) {
+            return Math.Atan2(to.Y - from.Y, to.X - from.X);
+        }
+
+        private double GetVerticalAngle(Vector3 from, Vector3 to) {
+            return Math.Atan2(to.Z - from.Z, to.X - from.X);
+        }
     }
 }
