@@ -30,17 +30,17 @@ namespace Geoff
                 double botToTargetAngle = Math.Atan2(ballLocation.Y - carLocation.Y, ballLocation.X - carLocation.X);
                 double botFrontToTargetAngle = botToTargetAngle - carRotation.Yaw;
                 // Correct the angle
-                if (botFrontToTargetAngle < -Math.PI)
-                    botFrontToTargetAngle += 2 * Math.PI;
-                if (botFrontToTargetAngle > Math.PI)
-                    botFrontToTargetAngle -= 2 * Math.PI;
+                botFrontToTargetAngle = correctAngle(botFrontToTargetAngle);
 
                 // Decide which way to steer in order to get to the ball.
-                if (botFrontToTargetAngle > 0)
-                    controller.Steer = 1;
-                else
-                    controller.Steer = -1;
+                controller.Steer = (float) (botFrontToTargetAngle / Math.PI);
 
+                /* Throttle between 0.5 and 1 depending on the steering angle
+                 * 0 Steer = 1 Throttle
+                 * +-1 Steer = 0.5 Throttle
+                 * A simply y = -2x+1 equation
+                 */
+                controller.Throttle = (float) (-2 * Math.Abs(controller.Steer)) + 1;
             }
             catch (Exception e)
             {
@@ -48,10 +48,18 @@ namespace Geoff
                 Console.WriteLine(e.StackTrace);
             }
 
-            // Set the throttle to 1 so the bot can move.
-            controller.Throttle = 1;
-
             return controller;
         }
+
+        private double correctAngle(double angle) {
+            if (angle < -Math.PI) {
+                angle += 2 * Math.PI;
+            } else if (angle > Math.PI) {
+                angle -= 2 * Math.PI;
+            }
+
+            return angle;
+        }
+        
     }
 }
